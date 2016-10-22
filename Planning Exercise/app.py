@@ -11,51 +11,22 @@ app = flask.Flask(__name__)
 
 
 @app.route("/")
-def gindex():
+def index():
     """
-    When you request the gaus path, you'll get the index.html template.
+    When you request the index path, you'll get the index.html template.
     """
     robot_cell = request.args.get('robot_cell', '')
-    if len(robot_cell)==0: mux="1"
-    return flask.render_template("index.html",robot_cell=robot_cell)
+    if len(robot_cell)==0: robot_cell="1"
+    return flask.render_template("index.html",robot_cell=robot_cell,machines="",petitions="")
 
-@app.route("/data")
-@app.route("/data/<int:ndata>")
-def data(ndata=100):
-    """
-    On request, this returns a list of ``ndata`` randomly made data points.
-    :param ndata: (optional)
-        The number of data points to return.
-    :returns data:
-        A JSON string of ``ndata`` data points.
-    """
-    x = 10 * np.random.rand(ndata) - 5
-    y = 0.5 * x + 0.5 * np.random.randn(ndata)
-    A = 10. ** np.random.rand(ndata)
-    c = np.random.rand(ndata)
-    return json.dumps([{"_id": i, "x": x[i], "y": y[i], "area": A[i],
-        "color": c[i]}
-        for i in range(ndata)])
-
-@app.route("/gdata")
-@app.route("/gdata/<float:mux>/<float:muy>")
-def gdata(ndata=100,mux=.5,muy=0.5):
-    """
-    On request, this returns a list of ``ndata`` randomly made data points.
-    about the mean mux,muy
-    :param ndata: (optional)
-        The number of data points to return.
-    :returns data:
-        A JSON string of ``ndata`` data points.
-    """
-
-    x = np.random.normal(mux,.5,ndata)
-    y = np.random.normal(muy,.5,ndata)
-    A = 10. ** np.random.rand(ndata)
-    c = np.random.rand(ndata)
-    return json.dumps([{"_id": i, "x": x[i], "y": y[i], "area": A[i],
-        "color": c[i]}
-        for i in range(ndata)])
+@app.route("/runplan")
+def runplan():
+    robot_cell = request.args.get('robot_cell', '')
+    machines = request.args.get('machines', '').split(",")
+    petitions = request.args.get('petitions', '').split(",")
+    print (machines)
+    if len(robot_cell)==0: robot_cell="1"
+    return flask.render_template("runplan.html")
 
 if __name__ == "__main__":
     import os

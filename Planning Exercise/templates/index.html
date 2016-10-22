@@ -1,17 +1,12 @@
 <!DOCTYPE html>
 <meta charset="utf-8">
-<title>Square Grid</title>
-{% if robot_cell %}
-    <form action="/">
+<title>Coffee Plan - Setup</title>
+    <form action="/runplan">
         robot_cell = <input type="text" name="robot_cell" value="{{robot_cell}}">
+        machines = <input id = "machines" type="text" name="machines" value="{{machines}}">
+        petitions = <input id = "petitions" type="text" name="petitions" value="{{petitions}}">
         <input type="submit" value="Submit">
     </form>
-{% else %}
-    <form action="">
-        robot_cell = <input type="text" name="robot_cell" value="{{robot_cell}}">
-        <input type="submit" value="Submit">
-    </form>
-{% endif %}
 <div id="grid"></div>
 <script src="http://d3js.org/d3.v3.min.js"></script>
 <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
@@ -22,31 +17,46 @@ var width = 6,
     height = 6;
 
 var squares = []
+var machines = []
+var petitions = []
 d3.range(height).forEach(function(j) {
   var row = [];
   d3.range(width).forEach(function(i) {
     var square = d3.select("#grid")
       .append("svg")
       .attr("class", "square")
-      .attr("id","square" + (width*j + i+1))
+      .attr("id","square" + (width*j + i))
     square.append('text')
-         .text((width*j + i+1))
+         .text((width*j + i))
          .attr("x",55)
          .attr("y",65)
          .attr("stroke","black")
          .attr("stroke-width","1")
     square.append("foreignObject")
         .append("xhtml:div")
-        .html("<input type='text' id=machines" + (width*j + i+1) + " placeholder='machines' style='width:50px;height:10px;'></input>");
+        .html("<input type='text' id=machines" + (width*j + i) + " placeholder='machines' style='width:50px;height:10px;' onchange='UpdateMachines(" + (width*j + i) + ")'></input>");
     square.append("foreignObject")
         .attr("y",25)
         .append("xhtml:div")
-        .html("<input type='text' id=petitions" + (width*j + i+1) + " placeholder='petitions' style='width:50px;height:10px;'></input>");
+        .html("<input type='text' id=petitions" + (width*j + i) + " placeholder='petitions' style='width:50px;height:10px;' onchange='UpdatePetitions(" + (width*j + i) + ")'></input>");
 
     row.push(square);
+    machines.push(0);
+    petitions.push(0);
   });
   squares.push(row);
 })
+
+function UpdateMachines(cell_index){
+    var machine_count= parseInt(d3.select("#machines" + cell_index).property("value"))
+    machines[cell_index] = machine_count
+    d3.select("#machines").property("value", machines)
+}
+function UpdatePetitions(cell_index){
+    var petition_count= parseInt(d3.select("#petitions" + cell_index).property("value"))
+    petitions[cell_index] = petition_count
+    d3.select("#petitions").property("value",petitions)
+}
 </script>
 
 <style>

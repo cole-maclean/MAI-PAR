@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<title>Coffee Plan - Simulation</title>
+<div id="grid"></div>
+<script src="http://d3js.org/d3.v3.min.js"></script>
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+<script>
+
+
+var width = 6,
+    height = 6;
+
+var squares = []
+d3.range(height).forEach(function(j) {
+  var row = [];
+  d3.range(width).forEach(function(i) {
+    var square = d3.select("#grid")
+      .append("svg")
+      .attr("class", "square")
+      .attr("id","square" + (width*j + i+1))
+    square.append('text')
+         .text((width*j + i+1))
+         .attr("x",55)
+         .attr("y",65)
+         .attr("stroke","black")
+         .attr("stroke-width","1")
+    row.push(square);
+  });
+  squares.push(row);
+})
+</script>
+
+<style>
+#grid {
+  width: 480px;
+  height: 480px;
+}
+.square {
+  width: 75px;
+  height: 75px;
+  margin: 1px;
+  background: #ddd;
+  float: left;
+}
+.square.active {
+  background: #d21;
+}
+</style>
