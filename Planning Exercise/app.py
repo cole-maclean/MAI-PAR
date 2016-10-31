@@ -5,7 +5,13 @@ import json
 import flask
 from flask import request
 import numpy as np
+from Planner import Planner
 
+
+def parse_input_state(robot_cell,petitions,machines):
+    parsed_petitions = {i:int(petition_count) for i,petition_count in enumerate(petitions) if int(petition_count) > 0}
+    parsed_machines = {i:int(machine_count) for i,machine_count in enumerate(machines) if int(machine_count) > 0}
+    return {'robot-location':int(robot_cell),'robot-free':True,'robot-loaded':0,'petitions':parsed_petitions,'served':[],'machines':parsed_machines,'steps':0}
 
 app = flask.Flask(__name__)
 
@@ -16,16 +22,18 @@ def index():
     When you request the index path, you'll get the index.html template.
     """
     robot_cell = request.args.get('robot_cell', '')
-    if len(robot_cell)==0: robot_cell="1"
+    if len(robot_cell)==0: robot_cell="0"
     return flask.render_template("index.html",robot_cell=robot_cell,machines="",petitions="")
 
 @app.route("/runplan")
 def runplan():
     robot_cell = request.args.get('robot_cell', '')
-    machines = request.args.get('machines', '').split(",")
     petitions = request.args.get('petitions', '').split(",")
-    print (machines)
-    if len(robot_cell)==0: robot_cell="1"
+    machines = request.args.get('machines', '').split(",")
+    initial_state = parse_input_state(robot_cell,petitions,machines)
+    robo_plan = Planner(initial_state,len(petitions))
+    print (robo_plan.state)
+    print (robo_plan.possible_actions())
     return flask.render_template("runplan.html")
 
 if __name__ == "__main__":
@@ -39,3 +47,6 @@ if __name__ == "__main__":
     # Set up the development server on port 8000.
     app.debug = True
     app.run(port=port)
+
+
+
