@@ -1,5 +1,6 @@
 import math
 import random
+import copy
 def office_cords(office,cols,rows):
     if office ==0:
         return 1,1
@@ -75,8 +76,7 @@ class Planner():
     def perform_step(self):
         actions = self.possible_actions()
         selected_action = self.select_action(actions)
-        print(selected_action)
-        self.plan.append({'state':self.state,'action':selected_action})
+        self.plan.append({'state':copy.deepcopy(self.state),'action':selected_action})
         act = selected_action[0]
         params = selected_action[1]
         if act == 'make':
@@ -92,3 +92,4 @@ class Planner():
         while self.goal_state == False and self.state['steps'] < 1000:
             self.perform_step()
         self.plan.append({'state':self.state,'action':{}})
+        return self.plan
