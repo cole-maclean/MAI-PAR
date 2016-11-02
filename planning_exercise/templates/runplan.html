@@ -83,7 +83,7 @@ var callback = function(data){
   svg.selectAll(".action").remove();
   actions.append("text")
              .text(function(d,i){
-                      if (i<state_indx){
+                      if (i<=state_indx){
                         return d['action'] + '-----total steps = ' + d['state']['steps']
                       }
                     })

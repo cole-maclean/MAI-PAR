@@ -16,7 +16,7 @@ class Planner():
     def __init__(self,initial_state,office_count):
         self.office_count = office_count
         self.state = initial_state
-        self.plan = []
+        self.plan = [{'action':'initialize','state':copy.deepcopy(self.state)}]
         self.goal_state = False
 
     def possible_actions(self):
@@ -76,7 +76,6 @@ class Planner():
     def perform_step(self):
         actions = self.possible_actions()
         selected_action = self.select_action(actions)
-        self.plan.append({'state':copy.deepcopy(self.state),'action':selected_action})
         act = selected_action[0]
         params = selected_action[1]
         if act == 'make':
@@ -86,10 +85,11 @@ class Planner():
         else:
             self.serve(*params)
         self.check_goal_state()
+        self.plan.append({'state':copy.deepcopy(self.state),'action':selected_action})
         return self.plan
 
     def build_plan(self):
         while self.goal_state == False and self.state['steps'] < 1000:
             self.perform_step()
-        self.plan.append({'state':self.state,'action':{}})
+        self.plan.append({'state':self.state,'action':'finished'})
         return self.plan

@@ -4,7 +4,6 @@ This file is part of the flask+d3 Hello World project.
 import json
 import flask
 from flask import request
-import numpy as np
 from Planner import Planner
 
 
