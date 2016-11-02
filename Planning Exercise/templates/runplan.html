@@ -6,28 +6,59 @@
 <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
 <script>
 
+  var width = 6,
+      height = 6;
 
-var width = 6,
-    height = 6;
+  var squares = []
+  d3.range(height).forEach(function(j) {
+    var row = [];
+    d3.range(width).forEach(function(i) {
+      var square = d3.select("#grid")
+        .append("svg")
+        .attr("class", "square")
+        .attr("id","square" + (width*j + i))
+      square.append('text')
+           .text((width*j + i))
+           .attr("x",55)
+           .attr("y",65)
+           .attr("stroke","black")
+           .attr("stroke-width","1")
+      row.push(square);
+    });
+    squares.push(row);
+  })
 
-var squares = []
-d3.range(height).forEach(function(j) {
-  var row = [];
-  d3.range(width).forEach(function(i) {
-    var square = d3.select("#grid")
-      .append("svg")
-      .attr("class", "square")
-      .attr("id","square" + (width*j + i))
-    square.append('text')
-         .text((width*j + i))
-         .attr("x",55)
-         .attr("y",65)
-         .attr("stroke","black")
-         .attr("stroke-width","1")
-    row.push(square);
-  });
-  squares.push(row);
-})
+var callback = function(data){
+  d3.select('#square' + data['robot-location']).append("svg:image")
+    .attr('width',50)
+    .attr('height',75)
+    .attr('y',20)
+    .attr("xlink:href","static/robot.PNG")
+
+  for (var office in data['machines']) {
+    for (i = 0; i < data['machines'][office]; i++) { 
+      d3.select('#square' + office).append("svg:image")
+      .attr('width',20)
+      .attr('height',20)
+      .attr('x',i*22)
+      .attr("xlink:href","static/coffee_machine.PNG")
+    }
+  }
+
+  for (var office in data['petitions']) {
+    for (i = 0; i < data['petitions'][office]; i++) { 
+      d3.select('#square' + office).append("svg:image")
+      .attr('width',20)
+      .attr('height',20)
+      .attr('x',i*22)
+      .attr('y',22)
+      .attr("xlink:href","static/coffee_petition.PNG")
+    }
+  }
+
+}
+d3.json("/gdata?robot_cell={{robot_cell}}&machines={{machines}}&petitions={{petitions}}", callback);
+
 </script>
 
 <style>

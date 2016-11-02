@@ -2,7 +2,7 @@ import math
 import random
 def office_cords(office,cols,rows):
     if office ==0:
-        return 0,0
+        return 1,1
     else:
         return office % cols, math.ceil(office/rows)
 
