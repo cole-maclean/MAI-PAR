@@ -49,13 +49,21 @@ d3.range(height).forEach(function(j) {
 
 function UpdateMachines(cell_index){
     var machine_count= parseInt(d3.select("#machines" + cell_index).property("value"))
+    if (isNaN(machine_count)){
+      machine_count = 0
+    }
     machines[cell_index] = machine_count
-    d3.select("#machines").property("value", machines)
+    flat_machines = machines.join('')
+    d3.select("#machines").property("value", flat_machines)
 }
 function UpdatePetitions(cell_index){
     var petition_count= parseInt(d3.select("#petitions" + cell_index).property("value"))
+    if (isNaN(petition_count)){
+      petition_count = 0
+    }
     petitions[cell_index] = petition_count
-    d3.select("#petitions").property("value",petitions)
+    flat_petitions = petitions.join('')
+    d3.select("#petitions").property("value",flat_petitions)
 }
 </script>
 

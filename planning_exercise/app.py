@@ -1,6 +1,3 @@
-"""
-This file is part of the flask+d3 Hello World project.
-"""
 import json
 import flask
 from flask import request
@@ -34,10 +31,10 @@ def runplan():
 @app.route("/gdata")
 def gdata():
     robot_cell = request.args.get('robot_cell','')
-    petitions = request.args.get('petitions','').split(',')
-    machines = request.args.get('machines','').split(',')
-    parsed_petitions = {i:int(petition_count) for i,petition_count in enumerate(petitions) if int(petition_count) > 0}
-    parsed_machines = {i:int(machine_count) for i,machine_count in enumerate(machines) if int(machine_count) > 0}
+    petitions = [int(pet) for pet in request.args.get('petitions','')]
+    machines = [int(mach) for mach in request.args.get('machines','')]
+    parsed_petitions = {i:petition_count for i,petition_count in enumerate(petitions) if petition_count > 0}
+    parsed_machines = {i:machine_count for i,machine_count in enumerate(machines) if machine_count > 0}
     initial_state = {'robot-location':int(robot_cell),'robot-free':True,'robot-loaded':0,'petitions':parsed_petitions,'served':[],'machines':parsed_machines,'steps':0}
     plan = Planner(initial_state,36).build_plan()
     return json.dumps(plan)
@@ -52,7 +49,7 @@ if __name__ == "__main__":
     #os.system("open http://localhost:{0}/".format(port))
 
     # Set up the development server on port 8000.
-    app.debug = False
+    app.debug = True
     app.run()
 
 
