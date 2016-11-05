@@ -22,7 +22,7 @@ class Planner():
 
     def possible_actions(self):
         r"""Return a list of allowable actions given the current state and satisfied pre-conditions. This method facilitates the pre-conditions check step for each operator in the STRIPS algorithm.
-        Actions are stored as nested lists of the form [action.[*action_params]]
+        Actions are stored as nested lists of the form [action,[*action_params]]
         """
         self.action_list = []
         robo_office = self.state['robot-location']

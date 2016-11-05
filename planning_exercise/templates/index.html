@@ -13,6 +13,8 @@
 <script>
 
 
+
+//add square grid of widthxheight squares and add input boxes for machine and petition coffee count configuration
 var width = 6,
     height = 6;
 
@@ -32,9 +34,11 @@ d3.range(height).forEach(function(j) {
          .attr("y",65)
          .attr("stroke","black")
          .attr("stroke-width","1")
+    //machine capacity input
     square.append("foreignObject")
         .append("xhtml:div")
         .html("<input type='text' id=machines" + (width*j + i) + " placeholder='machines' style='width:50px;height:10px;' onchange='UpdateMachines(" + (width*j + i) + ")'></input>");
+    //petitioned coffees input
     square.append("foreignObject")
         .attr("y",25)
         .append("xhtml:div")
@@ -47,18 +51,20 @@ d3.range(height).forEach(function(j) {
   squares.push(row);
 })
 
+//update list of coffee machine and capacities on user input
 function UpdateMachines(cell_index){
     var machine_count= parseInt(d3.select("#machines" + cell_index).property("value"))
-    if (isNaN(machine_count)){
+    if (isNaN(machine_count)){//set to zero if user deletes input
       machine_count = 0
     }
     machines[cell_index] = machine_count
     flat_machines = machines.join('')
     d3.select("#machines").property("value", flat_machines)
 }
+//update list of coffee petitions and counts on user input
 function UpdatePetitions(cell_index){
     var petition_count= parseInt(d3.select("#petitions" + cell_index).property("value"))
-    if (isNaN(petition_count)){
+    if (isNaN(petition_count)){//set to zero if user deletes input
       petition_count = 0
     }
     petitions[cell_index] = petition_count

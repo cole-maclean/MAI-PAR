@@ -22,9 +22,11 @@ svg = d3.select("body")
    //class to make it responsive
    .classed("svg-content-responsive", true)
 
+  //define square grid of grid_widthxgrid_height squares
   var grid_width = 6,
       grid_height = 6;
 
+  //for each row and column in the grid, add a rectangle to the svg, offsetted by their x-y coords
   var squares = []
   d3.range(grid_height).forEach(function(j) {
     var row = [];
@@ -56,7 +58,9 @@ svg = d3.select("body")
 
 
 var callback = function(data){
-
+ //function called from d3.json data load method. Displays planner action list and renders the robot, machine and petitions in the correct offices
+  
+ //Plan Step slider input controller
   d3.select("#nPlan")
   .attr('max',data.length-1)
   .attr("value","0")
@@ -66,7 +70,7 @@ var callback = function(data){
     render_state(this.value)
   });
 
-  
+  //performed action list
   var actions = svg.append("g")
                        .attr("width",300)
                        .attr("height",500)
@@ -77,21 +81,23 @@ var callback = function(data){
   render_state(0)
 
   function render_state(state_indx){
+    //render the current state for the Plan Step slider input state index
     state_indx = parseInt(state_indx)
     d3.selectAll('.state-img').remove();
 
-  svg.selectAll(".action").remove();
-  actions.append("text")
-             .text(function(d,i){
-                      if (i<=state_indx){
-                        return d['action'] + '-----total steps = ' + d['state']['steps']
-                      }
-                    })
-             .attr('y',function(d,i){return i*20})
-             .style("font-weight","bold")
-             .attr('class','action')
+    //displaytext of performed actions
+    svg.selectAll(".action").remove();
+    actions.append("text")
+               .text(function(d,i){
+                        if (i<=state_indx){
+                          return d['action'] + '-----total steps = ' + d['state']['steps']
+                        }
+                      })
+               .attr('y',function(d,i){return i*20})
+               .style("font-weight","bold")
+               .attr('class','action')
 
-
+    //render robot image in robot-location office
     d3.select('#square' + data[state_indx]['state']['robot-location']).append("svg:image")
       .attr('width',50)
       .attr('height',75)
@@ -99,6 +105,7 @@ var callback = function(data){
       .attr('class','state-img')
       .attr("xlink:href","static/robot.PNG")
 
+    //render machine image for each office with a coffee machine and the respective capacities
     for (var office in data[state_indx]['state']['machines']) {
       for (i = 0; i < data[state_indx]['state']['machines'][office]; i++) { 
         d3.select('#square' + office).append("svg:image")
@@ -110,6 +117,7 @@ var callback = function(data){
       }
     }
 
+    //render coffee image for each office with a petition and number of coffees requested
     for (var office in data[state_indx]['state']['petitions']) {
       for (i = 0; i < data[state_indx]['state']['petitions'][office]; i++) { 
         d3.select('#square' + office).append("svg:image")
@@ -123,6 +131,8 @@ var callback = function(data){
     }
   }
 }
+
+//data call to flask server for input data parsing and plan building
 d3.json("/gdata?robot_cell={{robot_cell}}&machines={{machines}}&petitions={{petitions}}", callback);
 
 </script>

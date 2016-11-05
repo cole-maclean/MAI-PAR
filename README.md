@@ -2,7 +2,7 @@
 <h1>Coffee Delivery Robot Linear Planner</h1>
 <b>MAI-PAR Planning Exercise</b>  
 <b>Cole MacLean</b>  
-<b>November 6, 2016</b>  
+<b>November 6, 2016</b> 
 
 <h2>Introduction</h2>
 A discrete state planning exercise is presented to utilize and test the linear planning with a stack of goals ([PRISM](http://www.cs.cmu.edu/~mmv/planning/readings/strips.pdf)) algorithm for agent planning.  
