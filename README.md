@@ -1,7 +1,7 @@
 
 <h1>Coffee Delivery Robot Linear Planner</h1>
 <b>MAI-PAR Planning Exercise</b>  
-<b>Cole MacLean and Lucky Chinedu</b>  
+<b>Cole MacLean</b>  
 <b>November 6, 2016</b>  
 
 <h2>Introduction</h2>
@@ -113,11 +113,11 @@ acts
 
 
 <b>Search Space Filtering Heuristics</b>  
-The method, select_action, uses 4 simple rules to select the optimal action from the list of all possible actions.
-#1.) If a serve action exists in the action_list, then perform the serve action
-#2.) If robot is loaded with a petitioned amount of cups, perform move action to the minimum manhatten distance to the petitioning offices
-#3.) If a make action is in the list, and #ofcups equals an existing petitioned #ofcups, then perform the make action that can serve the closest petition
-#4.) If no other actions than move to a machine exist, move to the closest machine capable of making #ofcups > or = an existing petitioned #ofcups
+The method, select_action, uses 4 simple rules to select the optimal action from the list of all possible actions.  
+1.) If a serve action exists in the action_list, then perform the serve action  
+2.) If robot is loaded with a petitioned amount of cups, perform move action to the minimum manhatten distance to the petitioning offices  
+3.) If a make action is in the list, and #ofcups equals an existing petitioned #ofcups, then perform the make action that can serve the closest petition  
+4.) If no other actions than move to a machine exist, move to the closest machine capable of making #ofcups > or = an existing petitioned #ofcups  
 
 
 ```python
@@ -142,7 +142,8 @@ my_planner.build_plan()
 
 
 
-    [{'action': 'initialize',
+    [
+    {'action': 'initialize',
       'state': {'machines': {3: 3, 7: 1, 20: 2, 22: 1, 30: 2},
        'petitions': {2: 1, 10: 3, 11: 1, 12: 2, 24: 1},
        'robot-free': True,
@@ -166,150 +167,7 @@ my_planner.build_plan()
        'robot-location': 2,
        'served': [],
        'steps': 1}},
-     {'action': ['serve', [2, 1]],
-      'state': {'machines': {3: 3, 7: 1, 20: 2, 22: 1, 30: 2},
-       'petitions': {10: 3, 11: 1, 12: 2, 24: 1},
-       'robot-free': True,
-       'robot-loaded': 0,
-       'robot-location': 2,
-       'served': [2],
-       'steps': 1}},
-     {'action': ['move', [2, 3]],
-      'state': {'machines': {3: 3, 7: 1, 20: 2, 22: 1, 30: 2},
-       'petitions': {10: 3, 11: 1, 12: 2, 24: 1},
-       'robot-free': True,
-       'robot-loaded': 0,
-       'robot-location': 3,
-       'served': [2],
-       'steps': 2}},
-     {'action': ['make', [3, 3]],
-      'state': {'machines': {3: 3, 7: 1, 20: 2, 22: 1, 30: 2},
-       'petitions': {10: 3, 11: 1, 12: 2, 24: 1},
-       'robot-free': False,
-       'robot-loaded': 3,
-       'robot-location': 3,
-       'served': [2],
-       'steps': 2}},
-     {'action': ['move', [3, 10]],
-      'state': {'machines': {3: 3, 7: 1, 20: 2, 22: 1, 30: 2},
-       'petitions': {10: 3, 11: 1, 12: 2, 24: 1},
-       'robot-free': False,
-       'robot-loaded': 3,
-       'robot-location': 10,
-       'served': [2],
-       'steps': 4}},
-     {'action': ['serve', [10, 3]],
-      'state': {'machines': {3: 3, 7: 1, 20: 2, 22: 1, 30: 2},
-       'petitions': {11: 1, 12: 2, 24: 1},
-       'robot-free': True,
-       'robot-loaded': 0,
-       'robot-location': 10,
-       'served': [2, 10],
-       'steps': 4}},
-     {'action': ['move', [10, 3]],
-      'state': {'machines': {3: 3, 7: 1, 20: 2, 22: 1, 30: 2},
-       'petitions': {11: 1, 12: 2, 24: 1},
-       'robot-free': True,
-       'robot-loaded': 0,
-       'robot-location': 3,
-       'served': [2, 10],
-       'steps': 6}},
-     {'action': ['make', [3, 1]],
-      'state': {'machines': {3: 3, 7: 1, 20: 2, 22: 1, 30: 2},
-       'petitions': {11: 1, 12: 2, 24: 1},
-       'robot-free': False,
-       'robot-loaded': 1,
-       'robot-location': 3,
-       'served': [2, 10],
-       'steps': 6}},
-     {'action': ['move', [3, 11]],
-      'state': {'machines': {3: 3, 7: 1, 20: 2, 22: 1, 30: 2},
-       'petitions': {11: 1, 12: 2, 24: 1},
-       'robot-free': False,
-       'robot-loaded': 1,
-       'robot-location': 11,
-       'served': [2, 10],
-       'steps': 9}},
-     {'action': ['serve', [11, 1]],
-      'state': {'machines': {3: 3, 7: 1, 20: 2, 22: 1, 30: 2},
-       'petitions': {12: 2, 24: 1},
-       'robot-free': True,
-       'robot-loaded': 0,
-       'robot-location': 11,
-       'served': [2, 10, 11],
-       'steps': 9}},
-     {'action': ['move', [11, 3]],
-      'state': {'machines': {3: 3, 7: 1, 20: 2, 22: 1, 30: 2},
-       'petitions': {12: 2, 24: 1},
-       'robot-free': True,
-       'robot-loaded': 0,
-       'robot-location': 3,
-       'served': [2, 10, 11],
-       'steps': 12}},
-     {'action': ['make', [3, 2]],
-      'state': {'machines': {3: 3, 7: 1, 20: 2, 22: 1, 30: 2},
-       'petitions': {12: 2, 24: 1},
-       'robot-free': False,
-       'robot-loaded': 2,
-       'robot-location': 3,
-       'served': [2, 10, 11],
-       'steps': 12}},
-     {'action': ['move', [3, 12]],
-      'state': {'machines': {3: 3, 7: 1, 20: 2, 22: 1, 30: 2},
-       'petitions': {12: 2, 24: 1},
-       'robot-free': False,
-       'robot-loaded': 2,
-       'robot-location': 12,
-       'served': [2, 10, 11],
-       'steps': 17}},
-     {'action': ['serve', [12, 2]],
-      'state': {'machines': {3: 3, 7: 1, 20: 2, 22: 1, 30: 2},
-       'petitions': {24: 1},
-       'robot-free': True,
-       'robot-loaded': 0,
-       'robot-location': 12,
-       'served': [2, 10, 11, 12],
-       'steps': 17}},
-     {'action': ['move', [12, 7]],
-      'state': {'machines': {3: 3, 7: 1, 20: 2, 22: 1, 30: 2},
-       'petitions': {24: 1},
-       'robot-free': True,
-       'robot-loaded': 0,
-       'robot-location': 7,
-       'served': [2, 10, 11, 12],
-       'steps': 19}},
-     {'action': ['make', [7, 1]],
-      'state': {'machines': {3: 3, 7: 1, 20: 2, 22: 1, 30: 2},
-       'petitions': {24: 1},
-       'robot-free': False,
-       'robot-loaded': 1,
-       'robot-location': 7,
-       'served': [2, 10, 11, 12],
-       'steps': 19}},
-     {'action': ['move', [7, 24]],
-      'state': {'machines': {3: 3, 7: 1, 20: 2, 22: 1, 30: 2},
-       'petitions': {24: 1},
-       'robot-free': False,
-       'robot-loaded': 1,
-       'robot-location': 24,
-       'served': [2, 10, 11, 12],
-       'steps': 23}},
-     {'action': ['serve', [24, 1]],
-      'state': {'machines': {3: 3, 7: 1, 20: 2, 22: 1, 30: 2},
-       'petitions': {},
-       'robot-free': True,
-       'robot-loaded': 0,
-       'robot-location': 24,
-       'served': [2, 10, 11, 12, 24],
-       'steps': 23}},
-     {'action': 'finished',
-      'state': {'machines': {3: 3, 7: 1, 20: 2, 22: 1, 30: 2},
-       'petitions': {},
-       'robot-free': True,
-       'robot-loaded': 0,
-       'robot-location': 24,
-       'served': [2, 10, 11, 12, 24],
-       'steps': 23}}]
+     ]
 
 
 
