@@ -2,7 +2,7 @@
 <meta charset="utf-8">
 <title>Coffee Plan - Simulation</title>
   <p>
-    Plan Step = <span id="nPlan-val">0</span>
+    Stack Step = <span id="nPlan-val">0</span>
     <input type="range" min="0" max="100" id="nPlan" step="1" value="0">
   </p>
 <script src="http://d3js.org/d3.v3.min.js"></script>
@@ -89,13 +89,25 @@ var callback = function(data){
     svg.selectAll(".action").remove();
     actions.append("text")
                .text(function(d,i){
-                        if (i<=state_indx){
+                        if (i<=state_indx && d['action'] != ''){
                           return d['action'] + '-----total steps = ' + d['state']['steps']
                         }
                       })
                .attr('y',function(d,i){return i*20})
+               .attr("x",150)
                .style("font-weight","bold")
                .attr('class','action')
+
+    svg.selectAll(".stack").remove();
+    actions.append("foreignObject")
+               .attr("width",150)
+               .html(function(d,i){
+                        if (i==state_indx){
+                          return d['stack'].join("<br>")
+                        }
+                      })
+               .style("font-weight","bold")
+               .attr('class','stack')
 
     //render robot image in robot-location office
     d3.select('#square' + data[state_indx]['state']['robot-location']).append("svg:image")

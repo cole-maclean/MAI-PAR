@@ -1,3 +1,5 @@
+##Make stack more obvious, don't let serve from mahcine of 3 to 2.
+
 import math
 import random
 import copy
@@ -14,74 +16,16 @@ class Planner():
     r"""The Planner class contains the methods used to build the coffee serving robots plan from initial state to goal state using a linear planner with stack of goals methodology (STRIPS)
     Reference: http://www.cs.cmu.edu/~mmv/planning/readings/strips.pdf
     """
-    def __init__(self,initial_state,office_count):
-        self.office_count = office_count
+    def __init__(self,initial_state):
+        self.office_count = 36 #numer of offices for grid creation
         self.state = initial_state
-        self.plan = [{'action':'initialize','state':copy.deepcopy(self.state)}] #store initial state in plan. deep copy needed to store unmutated state at each iteration
-        self.goal_state = False
-
-    def possible_actions(self):
-        r"""Return a list of allowable actions given the current state and satisfied pre-conditions. This method facilitates the pre-conditions check step for each operator in the STRIPS algorithm.
-        Actions are stored as nested lists of the form [action,[*action_params]]
-        """
-        self.action_list = []
-        robo_office = self.state['robot-location']
-        #OPERATOR: MOVE    PRECONDITIONS: robot-location(o1)  DATA-STRUCTURE: ['move',[office1,office2]]
-        #The preconditions for the move operator are always satisfied for movements from the robots current office to any other office.
-        for office in range(0,self.office_count):
-            #for all officies in the grid except the robots current office, append move(o1,o2) to action list
-            if office != robo_office:
-                self.action_list.append(['move',[robo_office,office]])
-
-        #OPERATOR: MAKE    PRECONDITIONS:  robot-location(o), robot-free, machine(o,n)  DATA-STRUCTURE: ['make',[office,#ofcups]]
-        #If the robot is free and in an office with a machine, append make(office,#ofcups) for all #ofcups from 1 to coffee machines capacity
-        if self.state['robot-free'] and robo_office in self.state['machines'].keys():
-            for cups in range(1,self.state['machines'][robo_office] + 1): 
-                self.action_list.append(['make',[robo_office,cups]])
-
-
-        #OPERATOR: SERVE    PRECONDITIONS:  robot-location(o), robot-loaded(n), petition(o,n)  DATA-STRUCTURE: ['serve',[office,#ofcups]]
-        #If the robot is in an office with a petition, check if the robot has loaded the number of cups requested by the petition and add serve(office,#ofcups) to action list
-        if robo_office in self.state['petitions'].keys():
-            if self.state['robot-loaded'] == self.state['petitions'][robo_office]:
-                self.action_list.append(['serve',[robo_office,self.state['robot-loaded']]])
-        return self.action_list
-
-    def select_action(self,action_list):
-        r"""Select the optimal action for the robot to perform from the possible action list by searching using some basic logical hueristics. 
-        """
-
-        #1.) If a serve action exists in the action_list, then perform the serve action
-        serve_action = [act for act in action_list if act[0] == 'serve']
-        if serve_action:
-            return serve_action[0]
-
-        #2.) If robot is loaded with a petitioned amount of cups, perform move action to the minimum manhatten distance to the petitioning offices
-        serve_move_action = [act for act in action_list if act[0] == 'move' and self.state['petitions'].get(act[1][1],None) == self.state['robot-loaded']]
-        if serve_move_action:
-            return min(serve_move_action, key=lambda x: manhattan_distance(x[1][0],x[1][1]))
-
-        #3.) If a make action is in the list, and #ofcups equals an existing petitioned #ofcups, then perform the make action that can serve the closest petition
-        make_action = [act for act in action_list if act[0] == 'make' and act[1][1] >= min(self.state['petitions'].values())]
-        best_make_action_distance = 1000
-        best_make_action = []
-        #for all possible make actions, find the one that allows a serve_move_action with the least distance
-        for possible_make_action in make_action:
-            possible_petition_offices = [pet_office for pet_office,pet_cups in self.state['petitions'].items() if pet_cups == possible_make_action[1][1]]
-            for petition_office in possible_petition_offices:
-                distance = manhattan_distance(possible_make_action[1][0],petition_office)
-                if distance < best_make_action_distance:
-                    best_make_action_distance = distance
-                    best_make_action = possible_make_action
-        if best_make_action:
-            return best_make_action
-
-        #4.) If no other actions than move to a machine exist, move to the closest machine capable of making #ofcups > or = an existing petitioned #ofcups
-        make_move_action = [act for act in action_list if act[0] == 'move' and self.state['machines'].get(act[1][1],0) >= min(self.state['petitions'].values())]
-        if make_move_action:
-            return min(make_move_action, key=lambda x: manhattan_distance(x[1][0],x[1][1]))
-
-        return 'Out of Actions!'
+        self.operator_list = ['move','make','serve']
+        self.stack_history = [{'action':'initialize','state':copy.deepcopy(self.state),'stack':[]}] #store initial state in plan. deep copy needed to store unmutated state at each iteration
+        self.plan = ['initialize']
+        self.goal_state = [('served',office) for office in self.state['petitions']] #the goal state is to have served all of the offices in the petition list
+        self.stack = []
+        for goal in self.goal_state: #initialize goal stack with goal state conditions
+            self.stack.append(goal)
 
     def make(self,office,cups):
         #OPERATOR: MAKE    ADD:  robot-loaded(n) DELETE: robot-free
@@ -103,32 +47,116 @@ class Planner():
         self.state['robot-loaded'] = 0
         return self.state
 
-    def check_goal_state(self):
-        if self.state['petitions']:
-            return False
-        else:
-            self.goal_state = True
-            return True
+    def get_preconds(self,operator):
+        #check the preconditions for each operator
+        op = operator[0]
+        params = operator[1]
+        if op == 'make':
+            return [('robot-free',True),('robot-location',params[0])]
+        elif op == 'move':
+            return [('robot-location',params[0])]
+        elif op == 'serve':
+            return [('robot-location',params[0]),('robot-loaded',params[1])]
 
-    def perform_step(self):
-        #perform single linear planner iteration by checking allowable actions and searching for optimal one to perform. Store state and selected action to plan list
-        actions = self.possible_actions()
-        selected_action = self.select_action(actions)
-        act = selected_action[0]
-        params = selected_action[1]
+    def get_additions(self,operator):
+        #check additions for each operator
+        op = operator[0]
+        params = operator[1]
+        if op == 'make':
+            return [('robot-loaded',params[1])]
+        elif op == 'move':
+            return [('robot-location',params[1])]
+        elif op == 'serve':
+            return [('served',params[0]),('robot-free',True)]
+
+    def apply_operator(self,operator):
+        #apply the selected operator to the current state
+        act = operator[0]
+        params = operator[1]
         if act == 'make':
             self.make(*params)
         elif act == 'move':
             self.move(*params)
         else:
             self.serve(*params)
-        self.check_goal_state()
-        self.plan.append({'state':copy.deepcopy(self.state),'action':selected_action}) #deep copy new state and action performed to obtain that state
-        return self.plan
+
+    def order_service(self):
+        #heuristic for ordering service goals in the stack based on closest machine to the robot that can serve one of the petitions
+        services = [service for service in self.stack if service[0] == 'served']
+        if services:
+            min_dist = 36
+            for srv in services:
+                for office,capacity in self.state['machines'].items():
+                    if capacity == self.state['petitions'][srv[1]]:
+                        if manhattan_distance(office,self.state['robot-location']) <= min_dist:
+                            closest_service = srv
+                            min_dist = manhattan_distance(office,self.state['robot-location'])
+            self.stack[self.stack.index(closest_service)] = self.stack[len(services)-1]
+            self.stack[len(services)-1] = closest_service
+        return self.stack
+
+    def order_make(self,cups):
+        #heuristic for ordering the make operators in the stack to select the make operation closest to the robot in the current state
+        closest_make =[]
+        min_dist = 36
+        for office,capacity in self.state['machines'].items():
+            if capacity == cups:
+                if manhattan_distance(office,self.state['robot-location']) < min_dist:
+                    closest_make = ['make',[office,cups]]
+                    min_dist = manhattan_distance(office,self.state['robot-location'])
+        return closest_make
+
+    def update_stack(self):
+        #update the current stack of goals
+        self.order_service() #apply order service heuristic
+        stack_goal = self.stack[-1] #select the bottom of the stack goal condition 
+        if stack_goal[0] in self.operator_list: #check if selected goal is an operator
+            preconditioned = True 
+            preconds = self.get_preconds(stack_goal) #get all the preconditions of the selected operator
+            for pre in preconds: #check if each precondition is satisfied in current state
+                if self.state[pre[0]] != pre[1] not in self.stack: #if the precondition is not satisfied, and it is not alreay in the stack, add it to the stack
+                    self.stack.append(pre)
+                    preconditioned = False #operation is not precontioned, so can not apply it to current state
+            if preconditioned == True: #if selected operator satisfies all preconditions, add it to end of plan and apply it to the current state
+                self.plan.append(stack_goal) #add operator to plan
+                self.stack_history.append({'state':copy.deepcopy(self.state),'action':stack_goal,'stack':copy.deepcopy(self.stack)}) #update stack history
+                self.apply_operator(stack_goal) #transition to new state by applying operator to current state
+                indx = self.stack.index(stack_goal)#pop operator from the stack of goals
+                del self.stack[indx]
+            else:
+                self.stack_history.append({'state':copy.deepcopy(self.state),'action':'','stack':copy.deepcopy(self.stack)})#update stack history
+        else:
+            for operator in self.operator_list: #if goal is not an operator, search through all the opertors to find one that has in its add list the selected goal
+                if operator == 'make':
+                    action = self.order_make(stack_goal[1])
+                    if action:      
+                        if stack_goal in self.get_additions(action):#if selected goal is in the make operators add list, add the make operator to the stack and delete the goal condition from the stack
+                            self.stack.append(action)
+                            indx = self.stack.index(stack_goal) #remove goal condition
+                            del self.stack[indx]
+                elif operator == 'move':
+                    action = ['move',[self.state['robot-location'],stack_goal[1]]]      
+                    if stack_goal in self.get_additions(action): #if selected goal is in the move operators add list, add the make operator to the stack and delete the goal condition from the stack
+                        self.stack.append(action)
+                        indx = self.stack.index(stack_goal)
+                        del self.stack[indx]
+                elif operator == 'serve':
+                    try:
+                        action = ['serve',[stack_goal[1],self.state['petitions'][stack_goal[1]]]]
+                        if stack_goal in self.get_additions(action): #if selected goal is in the serve operators add list, add the make operator to the stack and delete the goal condition from the stack
+                            self.stack.append(action)
+                            indx = self.stack.index(stack_goal)
+                            del self.stack[indx]
+                    except KeyError:
+                        pass
+            self.stack_history.append({'state':copy.deepcopy(self.state),'action':'','stack':copy.deepcopy(self.stack)}) #update stack history
+        return self.stack
 
     def build_plan(self):
-        #build plan by execution perform_step while goal state is not statisfied
-        while self.goal_state == False:
-            self.perform_step()
-        self.plan.append({'state':self.state,'action':'finished'})
-        return self.plan
+        #build plan by execution perform_step while stack is not empty
+        while self.stack:
+            self.update_stack()
+        self.plan.append('finished')
+        self.stack_history.append({'state':copy.deepcopy(self.state),'action':'','stack':copy.deepcopy(self.stack)})
+        return self.stack_history
+

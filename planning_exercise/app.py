@@ -34,8 +34,8 @@ def gdata():
     machines = [int(mach) for mach in request.args.get('machines','')]
     parsed_petitions = {i:petition_count for i,petition_count in enumerate(petitions) if petition_count > 0}
     parsed_machines = {i:machine_count for i,machine_count in enumerate(machines) if machine_count > 0}
-    initial_state = {'robot-location':int(robot_cell),'robot-free':True,'robot-loaded':0,'petitions':parsed_petitions,'served':[],'machines':parsed_machines,'steps':0}
-    plan = Planner(initial_state,36).build_plan()
+    initial_state = {'robot-location':int(robot_cell),'robot-free':True,'robot-loaded':0,'petitions':parsed_petitions,'served':[],'machines':parsed_machines,'steps':0,'stack':[]}
+    plan = Planner(initial_state).build_plan()
     return json.dumps(plan)
 
 

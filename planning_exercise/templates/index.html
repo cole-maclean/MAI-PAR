@@ -35,11 +35,12 @@ d3.range(height).forEach(function(j) {
          .attr("stroke","black")
          .attr("stroke-width","1")
     //machine capacity input
-    square.append("foreignObject")
+    square.append("svg:foreignObject")
+        .attr("y",5)
         .append("xhtml:div")
         .html("<input type='text' id=machines" + (width*j + i) + " placeholder='machines' style='width:50px;height:10px;' onchange='UpdateMachines(" + (width*j + i) + ")'></input>");
     //petitioned coffees input
-    square.append("foreignObject")
+    square.append("svg:foreignObject")
         .attr("y",25)
         .append("xhtml:div")
         .html("<input type='text' id=petitions" + (width*j + i) + " placeholder='petitions' style='width:50px;height:10px;' onchange='UpdatePetitions(" + (width*j + i) + ")'></input>");
